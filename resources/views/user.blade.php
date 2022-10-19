@@ -178,6 +178,7 @@
     </div>
 </div>
 <script>
+    
     var selection = document.querySelector('.alert') !== null;
     if (selection) {
         var alertList = document.querySelectorAll('.alert')
@@ -193,7 +194,16 @@
 
     function fetchdata()
     {
-
+        document.querySelector("#showdata").innerHTML = "";
+        let url = 'api/users';
+        fetch(url, {
+            method: "GET"
+        })
+        .then(response => response.json()) 
+        .then(data => {
+            console.log(data);
+            document.querySelector("#showdata").innerHTML += "";
+        });
     }
 
     document.querySelector('#add_edit_user').addEventListener('submit', (event) => {
@@ -212,7 +222,6 @@
         formdata.append('email', email);
         formdata.append('username', username);
         formdata.append('surname', surname);
-
 
         if(name=="")
         {
@@ -235,6 +244,7 @@
             return false;
         }
 
+        //insert data
         if(id=="")
         {
             if(password=="")
@@ -272,11 +282,19 @@
             })
             .then(response => response.json()) 
             .then(data => {
-
+                if(data.status==201)
+                {
+                    fetchdata();
+                }
+                else
+                {
+                    alert(data.message);
+                }
             });
         }
         else
         {
+            //update data
             if(password!=confirm_password)
             {
                 alert("Please Check Password And Confirm Password");
@@ -303,7 +321,14 @@
             })
             .then(response => response.json()) 
             .then(data => {
-
+                if(data.status==200)
+                {
+                    fetchdata();
+                }
+                else
+                {
+                    alert(data.message);
+                }
             });
         }
 

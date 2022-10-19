@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -43,7 +44,7 @@ class UserController extends Controller
             ];
             if($request->password!="")
             {
-                $updatedata['password'] = $request->password;
+                $updatedata['password'] = Hash::make($request->password);
             }
 
             $update = DB::table('users')->where('id', $decode_id)->update($updatedata);
@@ -67,7 +68,7 @@ class UserController extends Controller
                 'surname' => $request->surname,
                 'email' => $request->email,
                 'username' => $request->username,
-                'password' => $request->password,
+                'password' => Hash::make($request->password),
                 'created_date' => date("Y-m-d H:i:s"),
                 'update_date' => date("Y-m-d H:i:s")
             );
@@ -97,22 +98,43 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $data = array(
+        $dup_email = DB::table('users')->where('email', '=', $request->email)->count();
+        $dup_username = DB::table('users')->where('username','=', $request->username)->count();
+
+        if($dup_email)
+        {
+            $data['status'] = 500;
+            $data['message'] = "Email Dupplicate";
+            $data['user'] = "";
+            return response()->json($data);
+            exit;
+        }
+
+        if($dup_username)
+        {
+            $data['status'] = 500;
+            $data['message'] = "Username Dupplicate";
+            $data['user'] = "";
+            return response()->json($data);
+            exit;
+        }
+
+        $instdata = array(
             'name' => $request->name,
             'surname' => $request->surname,
             'email' => $request->email,
             'username' => $request->username,
-            'password' => $request->password,
+            'password' => Hash::make($request->password),
             'created_date' => date("Y-m-d H:i:s"),
             'update_date' => date("Y-m-d H:i:s")
         );
-       DB::table('users')->insert($data);
+        $save = DB::table('users')->insert($instdata);
 
         if($save)
         {
             $data['status'] = 201;
             $data['message'] = "Insert Complete";
-            $data['user'] = $user;
+            $data['user'] = $instdata;
         }
         else
         {
@@ -132,10 +154,10 @@ class UserController extends Controller
     public function show(User $user)
     {
         //
-        $users = User::all();
+        $users = DB::table('users')->select('id','username','name','surname','email','created_date','update_date')->get();
         $data['status'] = 200;
         $data['message'] = "Get Users Complete";
-        $data['user'] = $user;
+        $data['user'] = $users;
         return response()->json($data);
     }
 
@@ -166,9 +188,30 @@ class UserController extends Controller
      */
     public function update(Request $request,$id)
     {
+        $decode_id = str_replace("dgtei","",base64_decode($id));
+        $dup_email = DB::table('users')->where('email', '=', $request->email)->where('id','!=',$decode_id)->count();
+        $dup_username = DB::table('users')->where('username','=', $request->username)->where('id','!=',$decode_id)->count();
+
+        if($dup_email)
+        {
+            $data['status'] = 500;
+            $data['message'] = "Email Dupplicate";
+            $data['user'] = "";
+            return response()->json($data);
+            exit;
+        }
+
+        if($dup_username)
+        {
+            $data['status'] = 500;
+            $data['message'] = "Username Dupplicate";
+            $data['user'] = "";
+            return response()->json($data);
+            exit;
+        }
+
         if($request->id!=""&&$request->id!=null&&$request->id!="0")
         {
-            $decode_id = str_replace("dgtei","",base64_decode($id));
             $updatedata = [
                 'name'=>$request->name,
                 'surname'=>$request->surname,
@@ -178,14 +221,23 @@ class UserController extends Controller
             ];
             if($request->password!="")
             {
-                $updatedata['password'] = $request->password;
+                $updatedata['password'] = Hash::make($request->password);
             }
 
             $update = DB::table('users')->where('id', $decode_id)->update($updatedata);
 
-            $data['status'] = 200;
-            $data['message'] = "User Updated";
-            $data['user'] = $updatedata;
+            if($update)
+            {
+                $data['status'] = 200;
+                $data['message'] = "User Updated";
+                $data['user'] = $updatedata;
+            }
+            else
+            {
+                $data['status'] = 500;
+                $data['message'] = "Updated Incomplete";
+                $data['user'] = "";
+            }
 
             return response()->json($data);
         }
