@@ -307,6 +307,7 @@
             .then(data => {
                 if(data.status==201)
                 {
+                    alert(data.message);
                     fetchdata();
                 }
                 else
