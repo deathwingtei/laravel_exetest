@@ -17,10 +17,10 @@ use Illuminate\Support\Facades\Route;
 // List User
 Route::get('/users', [App\Http\Controllers\UserController::class, 'show']);
 //single Users
-Route::get('/user/{id}', [App\Http\Controllers\UserController::class, 'show']);
+Route::get('/user/{id}', [App\Http\Controllers\UserController::class, 'edit']);
 //create new User
 Route::post('/user', [App\Http\Controllers\UserController::class, 'store']);
 //update User
-Route::put('/user/{id}', [App\Http\Controllers\UserController::class, 'update']);
+Route::post('/user/{id}', [App\Http\Controllers\UserController::class, 'update']);
 //delete User
 Route::delete('/user/{id}', [App\Http\Controllers\UserController::class, 'destroy']);

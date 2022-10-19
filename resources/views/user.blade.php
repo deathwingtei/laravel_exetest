@@ -155,7 +155,7 @@
                                 </tr>
                             </thead>
                             <tbody id="showdata">
-                                @php($i = 1)
+                                <!-- @php($i = 1)
                                 @foreach($users as $user)
                                 <tr>
                                     <th scope="row">{{$i}}</th>
@@ -168,7 +168,7 @@
                                     <th><a onclick="return confirm('Are you sure you want to delete this item?');" href="{{url('user/softdelete/'.$user->id)}}" class="text-danger delete_user">Delete</a></th>
                                 </tr>
                                 @php($i++)
-                                @endforeach
+                                @endforeach -->
                             </tbody>
                         </table>
                     </div>
@@ -179,6 +179,8 @@
 </div>
 <script>
     
+    fetchdata()
+
     var selection = document.querySelector('.alert') !== null;
     if (selection) {
         var alertList = document.querySelectorAll('.alert')
@@ -201,9 +203,30 @@
         })
         .then(response => response.json()) 
         .then(data => {
-            console.log(data);
-            document.querySelector("#showdata").innerHTML += "";
+            // console.log(data);
+            let c = 1;
+            let txt = "";
+            data.users.forEach(function(user){
+                txt = "<tr><td>"+c+"</td><td>"+user.name+"</td><td>"+user.username+"</td><td>"+user.email+"</td>";
+                txt += "<td>"+user.created_date+"</td><td>"+user.update_date+"</td>";
+                txt += '<td><a style="cursor:pointer;" class="text-primary edit_user" data-id="'+user.enc_id+'">Edit</a></td>';
+                txt += '<td><a style="cursor:pointer;" data-id="'+user.enc_id+'" class="text-danger delete_user">Delete</a></td>';
+                txt += "</tr>";
+                document.querySelector("#showdata").innerHTML += txt;
+                c++;
+            });
+            document.getElementById("id").value = '';
+            document.getElementById("name").value = '';
+            document.getElementById("email").value = '';
+            document.getElementById("password").value = '';
+            document.getElementById("confirm_password").value = '';
+            document.getElementById("username").value = '';
+            document.getElementById("surname").value = '';
+            editbtn();
+            deletebtn();
         });
+
+        
     }
 
     document.querySelector('#add_edit_user').addEventListener('submit', (event) => {
@@ -308,9 +331,8 @@
 
             let url = 'api/user/'+id;
             fetch(url, {
-                method: "PUT",
+                method: "post",
                 body: formdata,
-                mode: 'no-cors', // no-cors, *cors, same-origin
                 cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
                 headers: {
                     "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -323,6 +345,7 @@
             .then(data => {
                 if(data.status==200)
                 {
+                    alert(data.message);
                     fetchdata();
                 }
                 else
@@ -337,32 +360,74 @@
         return false;
     });
 
-    document.querySelectorAll('.edit_user').forEach((li) => {
-    li.addEventListener('click', (event) => {
-        const thisid = li.getAttribute("data-id");
-
-        let url = 'api/user/'+thisid;
-        fetch(url, {
-            method: "GET",
-            mode: 'no-cors', // no-cors, *cors, same-origin
-            cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-            headers: {
-                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'X-Requested-With': 'XMLHttpRequest'
-              },
-            redirect: 'follow', // manual, *follow, error
-            referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-        })
-        .then(response => response.json()) 
-        .then(data => {
-            (console.log(data));
-            document.getElementById("id").value = data.enc_id;
-            document.getElementById("name").value = data.name;
-            document.getElementById("email").value = data.email;
-            document.getElementById("username").value = data.username;
-            document.getElementById("surname").value = data.surname;
+    function editbtn()
+    {
+        document.querySelectorAll('.edit_user').forEach((li) => { 
+            li.addEventListener('click', (event) => {
+                event.preventDefault();
+                const thisid = li.getAttribute("data-id");
+               
+                let url = 'api/user/'+thisid;
+                fetch(url, {
+                    method: "GET",
+                    headers: {
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                })
+                .then(response => response.json()) 
+                .then(data => {
+                    if(data.status==200)
+                    {
+                        document.getElementById("id").value = data.user.enc_id;
+                        document.getElementById("name").value = data.user.name;
+                        document.getElementById("email").value = data.user.email;
+                        document.getElementById("username").value = data.user.username;
+                        document.getElementById("surname").value = data.user.surname;
+                    }
+                    else
+                    {
+                        alert(data.message);
+                    }
+                });
+            });
         });
-    });
-});
+    }
+
+    function deletebtn()
+    {
+        document.querySelectorAll('.delete_user').forEach((li) => { 
+            li.addEventListener('click', (event) => {
+                event.preventDefault();
+                if (confirm("Are you sure?")) {
+                    const thisid = li.getAttribute("data-id");
+                
+                    let url = 'api/user/'+thisid;
+                    fetch(url, {
+                        method: "DELETE",
+                        headers: {
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                    })
+                    .then(response => response.json()) 
+                    .then(data => {
+                        if(data.status==200)
+                        {
+                            alert(data.message);
+                            fetchdata();
+                        }
+                        else
+                        {
+                            alert(data.message);
+                        }
+                    
+                    });
+                }
+
+            });
+        });
+    }
+
 </script>
 @endsection

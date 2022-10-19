@@ -155,9 +155,13 @@ class UserController extends Controller
     {
         //
         $users = DB::table('users')->select('id','username','name','surname','email','created_date','update_date')->get();
+        foreach ($users as $key => $value) {
+            $users[$key]->enc_id = base64_encode($value->id."dgtei");
+        }
+
         $data['status'] = 200;
         $data['message'] = "Get Users Complete";
-        $data['user'] = $users;
+        $data['users'] = $users;
         return response()->json($data);
     }
 
@@ -258,11 +262,12 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
+        $decode_id = str_replace("dgtei","",base64_decode($id));
         $delete =  DB::table('users')->where('id', $decode_id)->delete();
 
         $data['status'] = 200;
         $data['message'] = "User Delete";
-        $data['user'] = $updatedata;
+        $data['user'] = $delete;
 
         return response()->json($data);
     }
