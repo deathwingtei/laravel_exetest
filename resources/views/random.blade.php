@@ -15,6 +15,9 @@
     let items = [];
     let showitem = [];
     let sumitem = [];
+    let randomnum = 100;
+    let posrandom = [];
+
     
     function resetitem()
     {
@@ -36,30 +39,41 @@
 
     function randomitem(index)
     {
-        thisrandom = Math.floor(Math.random() * items.length);
-        if(parseInt(items[thisrandom]['stock'])>=1)
+        // thisrandom = Math.floor(Math.random() * items.length);
+        let thisrandom = 0;
+        thisrandom = Math.floor(Math.random() * randomnum);
+        let thisindex = posrandom[thisrandom];
+
+        if(parseInt(items[thisindex]['stock'])>=1)
         {
-            items[thisrandom]['stock'] = parseInt(items[thisrandom]['stock'])-1;
-            if (typeof sumitem[thisrandom] !== 'undefined') {
-                sumitem[thisrandom]+=1;
+            items[thisindex]['stock'] = parseInt(items[thisindex]['stock'])-1;
+            if (typeof sumitem[thisindex] !== 'undefined') {
+                sumitem[thisindex]+=1;
             }
             else
             {
-                sumitem[thisrandom]=1;
-                
+                sumitem[thisindex]=1;
             }
-           
         }
         else
         {
             randomitem(index);
         }
         
-        showitem[index] = (index+1)+'. '+items[thisrandom]['name'];
+        showitem[index] = (index+1)+'. '+items[thisindex]['name'];
     }
 
     document.querySelector("#randomitem").addEventListener('click', e => {
         items = resetitem();
+        let crandom = 0;
+        items.forEach(function(item,index){
+            for (let x = 0; x < (item.chance*100); x++) {
+                
+                posrandom[crandom] = index;
+                crandom++;
+            }
+        });
+
         showitem = [];
         sumitem = [];
         let thisrandom = 0;
