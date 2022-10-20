@@ -7,8 +7,19 @@
             <button class="btn btn-info" id="randomitem">Random</button>
         </div>
     </div>
-    <div class="row" id="show_random">
-            
+    <div class="row mt-5"  id="show_stock">
+
+    </div>
+    <div class="row mt-5">
+        <div class="col-4"  id="show_random">
+
+        </div>
+        <div class="col-4"  id="show_random_summary">
+
+        </div>
+        <div class="col-4"  id="show_random_remaining">
+
+        </div>
     </div>
 </div>
 <script>
@@ -18,7 +29,16 @@
     let randomnum = 100;
     let posrandom = [];
 
-    
+    document.addEventListener("DOMContentLoaded", () => {
+        items = resetitem();
+        let show_stock_div = document.querySelector("#show_stock");
+        show_stock_div.innerHTML = "<h2>Percent Item</h2>";
+        items.forEach(function(item,index){
+            show_stock_div.innerHTML += "<div class='col-12'>"+items[index]['name']+" || Chance : "+(items[index]['chance']*100)+"% || Stock : "+items[index]['stock']+"</div>";
+        });
+    });
+
+
     function resetitem()
     {
         return [
@@ -66,9 +86,9 @@
     document.querySelector("#randomitem").addEventListener('click', e => {
         items = resetitem();
         let crandom = 0;
+
         items.forEach(function(item,index){
             for (let x = 0; x < (item.chance*100); x++) {
-                
                 posrandom[crandom] = index;
                 crandom++;
             }
@@ -83,18 +103,23 @@
         }
 
         let randomdiv = document.querySelector("#show_random");
-        randomdiv.innerHTML = "<br><h2>Item Recieved</h2>";
+        randomdiv.innerHTML = "<h2>Item Recieved</h2>";
         for (let index = 0; index < 100; index++) {
-            randomdiv.innerHTML += "<div class='col-12'>"+showitem[index]+"</div>";
+            randomdiv.innerHTML += "<div>"+showitem[index]+"</div>";
         }
-        randomdiv.innerHTML += "<br><h2>Item Recieved Summary</h2>";
+        
+        let randomremaindiv = document.querySelector("#show_random_remaining");
+        randomremaindiv.innerHTML = "<h2>Stock Remaining</h2>";
         for (let index = 0; index < items.length; index++) {
-            randomdiv.innerHTML += "<div class='col-12'>"+items[index]['name']+" "+sumitem[index]+" EA"+"</div>";
+            randomremaindiv.innerHTML += "<div>"+items[index]['name']+" Stock : "+items[index]['stock']+"</div>";
         }
-        randomdiv.innerHTML += "<br><h2>Stock Remaining</h2>";
+
+        let randomsumdiv = document.querySelector("#show_random_summary");
+        randomsumdiv.innerHTML = "<h2>Item Recieved Summary</h2>";
         for (let index = 0; index < items.length; index++) {
-            randomdiv.innerHTML += "<div class='col-12'>"+items[index]['name']+" Stock : "+items[index]['stock']+"</div>";
+            randomsumdiv.innerHTML += "<div>"+items[index]['name']+" "+sumitem[index]+" EA"+"</div>";
         }
+
     });
 </script>
 @endsection
